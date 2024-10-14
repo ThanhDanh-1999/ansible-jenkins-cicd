@@ -1,0 +1,39 @@
+
+---
+- hosts: all
+  become: True
+  become_user: "{{ become_user }}"
+  vars:
+    chdir_path: /home/src
+  tasks:
+    - name: Go to the folder and execute command
+      args:
+        chdir: '{{ chdir_path }}'
+      command: ls
+      register: output
+    - debug: var=output.stdout_lines
+
+    - name: Git Clone src Frontend 
+      args:
+        chdir: '{{ chdir_path }}/Frontend'
+      # command: git clone ssh://git@gitlab.com:gitlab-examples/Frontend.git --branch master
+      shell: |
+        git checkout master
+        git pull origin master
+      register: output
+    - debug: var=output.stdout_lines
+
+    - name: Git Clone Backend
+      args:
+        chdir: '{{ chdir_path }}/Backend'
+      # command: git clone ssh://git@gitlab.com:gitlab-examples/Backend.git --branch master
+      shell: |
+        git checkout master
+        git pull origin master
+      register: output
+    - debug: var=output.stdout_lines
+
+    - name: Run forever restart all
+      command: "{{ forever }} restartall"
+      register: output
+    - debug: var=output.stdout_lines
